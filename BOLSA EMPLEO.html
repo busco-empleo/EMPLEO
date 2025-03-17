@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bolsa de Trabajo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .job {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .job h3 {
+            margin: 0;
+        }
+        .job p {
+            margin: 5px 0;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        button {
+            background: blue;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bolsa de Trabajo</h1>
+        <h2>Publicar una oferta</h2>
+        <form id="jobForm">
+            <div class="form-group">
+                <input type="text" id="title" placeholder="Título del empleo" required>
+            </div>
+            <div class="form-group">
+                <input type="text" id="company" placeholder="Nombre de la empresa" required>
+            </div>
+            <div class="form-group">
+                <input type="text" id="address" placeholder="Dirección (opcional)">
+            </div>
+            <div class="form-group">
+                <input type="text" id="phone" placeholder="Teléfono (opcional)">
+            </div>
+            <div class="form-group">
+                <input type="email" id="email" placeholder="Correo electrónico (opcional)">
+            </div>
+            <div class="form-group">
+                <textarea id="description" placeholder="Descripción del empleo" required></textarea>
+            </div>
+            <button type="submit">Publicar</button>
+        </form>
+        
+        <h2>Ofertas Disponibles</h2>
+        <div id="jobList"></div>
+    </div>
+    
+    <script>
+        document.getElementById('jobForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            let title = document.getElementById('title').value;
+            let company = document.getElementById('company').value;
+            let address = document.getElementById('address').value;
+            let phone = document.getElementById('phone').value;
+            let email = document.getElementById('email').value;
+            let description = document.getElementById('description').value;
+            
+            let jobList = document.getElementById('jobList');
+            let jobItem = document.createElement('div');
+            jobItem.classList.add('job');
+            jobItem.innerHTML = `<h3>${title}</h3><p><strong>${company}</strong></p><p>${description}</p>`;
+            
+            if (address) {
+                jobItem.innerHTML += `<p><strong>Dirección:</strong> ${address}</p>`;
+            }
+            if (phone) {
+                jobItem.innerHTML += `<p><strong>Teléfono:</strong> ${phone}</p>`;
+            }
+            if (email) {
+                jobItem.innerHTML += `<p><strong>Correo:</strong> ${email}</p>`;
+            }
+            
+            let timestamp = Date.now();
+            jobItem.setAttribute('data-timestamp', timestamp);
+            jobList.appendChild(jobItem);
+            
+            document.getElementById('jobForm').reset();
+            
+            localStorage.setItem(timestamp, jobItem.outerHTML);
+        });
+        
+        function removeExpiredJobs() {
+            let jobList = document.getElementById('jobList');
+            let now = Date.now();
+            let expirationTime = 20 * 24 * 60 * 60 * 1000; 
+            
+            for (let key in localStorage) {
+                if (!isNaN(key)) {
+                    let savedTime = parseInt(key);
+                    if (now - savedTime > expirationTime) {
+                        localStorage.removeItem(key);
+                    }
+                }
+            }
+            
+            jobList.innerHTML = '';
+            for (let key in localStorage) {
+                if (!isNaN(key)) {
+                    jobList.innerHTML += localStorage.getItem(key);
+                }
+            }
+        }
+        
+        window.onload = function() {
+            removeExpiredJobs();
+        };
+    </script>
+</body>
+</html>
